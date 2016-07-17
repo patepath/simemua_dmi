@@ -16,7 +16,6 @@ import java.awt.RenderingHints;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.geom.AffineTransform;
-import java.io.File;
 import java.io.IOException;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
@@ -25,6 +24,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.imageio.ImageIO;
 import javax.swing.Timer;
+import org.apache.commons.io.FileUtils;
 
 /**
  *
@@ -66,8 +66,6 @@ public class MainFrame extends javax.swing.JFrame implements ActionListener {
 	private final SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
 	private final DecimalFormat df = new DecimalFormat("#,###");
 
-	
-	
 	/**
 	 * Creates new form MainFrame
 	 */
@@ -78,31 +76,31 @@ public class MainFrame extends javax.swing.JFrame implements ActionListener {
 		timer.start();
 
 		try {
-			brake_indicator_yellow = ImageIO.read(new File(this.getClass().getClassLoader().getResource("img/brake_indicator_yellow.png").getFile()));
-			brake_indicator_red = ImageIO.read(new File(this.getClass().getClassLoader().getResource("img/brake_indicator_red.png").getFile()));
-			speedoDial = ImageIO.read(new File(this.getClass().getClassLoader().getResource("img/speedo_dial.png").getFile()));
-			speedoPinWhite = ImageIO.read(new File(this.getClass().getClassLoader().getResource("img/speedo_pin_white.png").getFile()));
-			speedoPinYellow = ImageIO.read(new File(this.getClass().getClassLoader().getResource("img/speedo_pin_yellow.png").getFile()));
-			speedoPinRed = ImageIO.read(new File(this.getClass().getClassLoader().getResource("img/speedo_pin_red.png").getFile()));
-			targetDestination = ImageIO.read(new File(this.getClass().getClassLoader().getResource("img/target_destination.png").getFile()));
-			apt_status_auto = ImageIO.read(new File(this.getClass().getClassLoader().getResource("img/atp_status_auto.png").getFile()));
-			apt_status_mcs = ImageIO.read(new File(this.getClass().getClassLoader().getResource("img/atp_status_mcs.png").getFile()));
-			apt_status_atb = ImageIO.read(new File(this.getClass().getClassLoader().getResource("img/atp_status_atb.png").getFile()));
-			apt_status_yard_sr = ImageIO.read(new File(this.getClass().getClassLoader().getResource("img/atp_status_yard_sr.png").getFile()));
-			apt_status_yard_eoa = ImageIO.read(new File(this.getClass().getClassLoader().getResource("img/atp_status_yard_eoa.png").getFile()));
-			apt_status_line_sr = ImageIO.read(new File(this.getClass().getClassLoader().getResource("img/atp_status_line_sr.png").getFile()));
-			apt_status_rv = ImageIO.read(new File(this.getClass().getClassLoader().getResource("img/atp_status_rv.png").getFile()));
-			atena_yellow = ImageIO.read(new File(this.getClass().getClassLoader().getResource("img/atena_yellow.png").getFile()));
-			atena_green = ImageIO.read(new File(this.getClass().getClassLoader().getResource("img/atena_green.png").getFile()));
-			atena_fail = ImageIO.read(new File(this.getClass().getClassLoader().getResource("img/atena_fail.png").getFile()));
-			ato_status_ok = ImageIO.read(new File(this.getClass().getClassLoader().getResource("img/ato_status_ok.png").getFile()));
-			ato_status_fail = ImageIO.read(new File(this.getClass().getClassLoader().getResource("img/ato_status_fail.png").getFile()));
-			door_indicator_both = ImageIO.read(new File(this.getClass().getClassLoader().getResource("img/door_indicator_both.png").getFile()));
-			door_indicator_left = ImageIO.read(new File(this.getClass().getClassLoader().getResource("img/door_indicator_left.png").getFile()));
-			door_indicator_right = ImageIO.read(new File(this.getClass().getClassLoader().getResource("img/door_indicator_right.png").getFile()));
-			door_status_close = ImageIO.read(new File(this.getClass().getClassLoader().getResource("img/door_status_close.png").getFile()));
-			door_status_open = ImageIO.read(new File(this.getClass().getClassLoader().getResource("img/door_status_open.png").getFile()));
-			scroll_arrow = ImageIO.read(new File(this.getClass().getClassLoader().getResource("img/scroll_arrow.png").getFile()));
+			brake_indicator_yellow = ImageIO.read(FileUtils.toFile(this.getClass().getClassLoader().getResource("img/brake_indicator_yellow.png")));
+			brake_indicator_red = ImageIO.read(FileUtils.toFile(this.getClass().getClassLoader().getResource("img/brake_indicator_red.png")));
+			speedoDial = ImageIO.read(FileUtils.toFile(this.getClass().getClassLoader().getResource("img/speedo_dial.png")));
+			speedoPinWhite = ImageIO.read(FileUtils.toFile(this.getClass().getClassLoader().getResource("img/speedo_pin_white.png")));
+			speedoPinYellow = ImageIO.read(FileUtils.toFile(this.getClass().getClassLoader().getResource("img/speedo_pin_yellow.png")));
+			speedoPinRed = ImageIO.read(FileUtils.toFile(this.getClass().getClassLoader().getResource("img/speedo_pin_red.png")));
+			targetDestination = ImageIO.read(FileUtils.toFile(this.getClass().getClassLoader().getResource("img/target_destination.png")));
+			apt_status_auto = ImageIO.read(FileUtils.toFile(this.getClass().getClassLoader().getResource("img/atp_status_auto.png")));
+			apt_status_mcs = ImageIO.read(FileUtils.toFile(this.getClass().getClassLoader().getResource("img/atp_status_mcs.png")));
+			apt_status_atb = ImageIO.read(FileUtils.toFile(this.getClass().getClassLoader().getResource("img/atp_status_atb.png")));
+			apt_status_yard_sr = ImageIO.read(FileUtils.toFile(this.getClass().getClassLoader().getResource("img/atp_status_yard_sr.png")));
+			apt_status_yard_eoa = ImageIO.read(FileUtils.toFile(this.getClass().getClassLoader().getResource("img/atp_status_yard_eoa.png")));
+			apt_status_line_sr = ImageIO.read(FileUtils.toFile(this.getClass().getClassLoader().getResource("img/atp_status_line_sr.png")));
+			apt_status_rv = ImageIO.read(FileUtils.toFile(this.getClass().getClassLoader().getResource("img/atp_status_rv.png")));
+			atena_yellow = ImageIO.read(FileUtils.toFile(this.getClass().getClassLoader().getResource("img/atena_yellow.png")));
+			atena_green = ImageIO.read(FileUtils.toFile(this.getClass().getClassLoader().getResource("img/atena_green.png")));
+			atena_fail = ImageIO.read(FileUtils.toFile(this.getClass().getClassLoader().getResource("img/atena_fail.png")));
+			ato_status_ok = ImageIO.read(FileUtils.toFile(this.getClass().getClassLoader().getResource("img/ato_status_ok.png")));
+			ato_status_fail = ImageIO.read(FileUtils.toFile(this.getClass().getClassLoader().getResource("img/ato_status_fail.png")));
+			door_indicator_both = ImageIO.read(FileUtils.toFile(this.getClass().getClassLoader().getResource("img/door_indicator_both.png")));
+			door_indicator_left = ImageIO.read(FileUtils.toFile(this.getClass().getClassLoader().getResource("img/door_indicator_left.png")));
+			door_indicator_right = ImageIO.read(FileUtils.toFile(this.getClass().getClassLoader().getResource("img/door_indicator_right.png")));
+			door_status_close = ImageIO.read(FileUtils.toFile(this.getClass().getClassLoader().getResource("img/door_status_close.png")));
+			door_status_open = ImageIO.read(FileUtils.toFile(this.getClass().getClassLoader().getResource("img/door_status_open.png")));
+			scroll_arrow = ImageIO.read(FileUtils.toFile(this.getClass().getClassLoader().getResource("img/scroll_arrow.png")));
 		} catch (IOException ex) {
 			Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, ex);
 		}
@@ -113,10 +111,10 @@ public class MainFrame extends javax.swing.JFrame implements ActionListener {
 		g2.drawImage(speedoDial, 100, 50, this);
 
 		drawBrake();
-		drawTargetDestination();
+		drawTargetDestance();
 		drawPin();
 		drawATOStatus();
-		drawAtena();
+		drawAtenna();
 		drawATPStatus();
 		drawDoorIndicator();
 		drawCeillingSpeed();
@@ -138,8 +136,8 @@ public class MainFrame extends javax.swing.JFrame implements ActionListener {
 		g2.drawImage(brake_indicator_red, 10, 525, this);
 		g2.drawImage(brake_indicator_yellow, 10, 565, this);
 	}
-	
-	private void drawTargetDestination() {
+
+	private void drawTargetDestance() {
 		g2.drawImage(targetDestination, 30, 90, this);
 	}
 
@@ -167,16 +165,16 @@ public class MainFrame extends javax.swing.JFrame implements ActionListener {
 
 	private void drawCeillingSpeed() {
 		int strWidth;
-		String speedShow="0";
-		
+		String speedShow = "0";
+
 		g2.setColor(Color.RED);
 		g2.setFont(new Font("Loma", Font.BOLD, 50));
 		FontMetrics metrics = g2.getFontMetrics();
 		strWidth = metrics.stringWidth(speedShow);
-		
+
 		g2.drawString(String.valueOf(speedShow), 306 - strWidth / 2, 535);
 	}
-	
+
 	private double getPinAngle(double speed) {
 		if (speed <= 50) {
 			return -140 + (2.8 * speed);
@@ -188,8 +186,8 @@ public class MainFrame extends javax.swing.JFrame implements ActionListener {
 	private void drawATOStatus() {
 		g2.drawImage(ato_status_fail, 220, 430, this);
 	}
-	
-	private void drawAtena() {
+
+	private void drawAtenna() {
 		g2.drawImage(atena_yellow, 281, 430, this);
 	}
 
@@ -200,15 +198,15 @@ public class MainFrame extends javax.swing.JFrame implements ActionListener {
 		g2.drawImage(apt_status_mcs, 450, 430, this);
 		//g2.drawRect(450, 430, 50, 50);
 	}
-	
+
 	private void drawDoorIndicator() {
 		g2.drawImage(door_indicator_right, 520, 490, this);
 	}
-	
+
 	private void drawDoorStatus() {
 		g2.drawImage(door_status_open, 565, 483, this);
 	}
-	
+
 	private void drawScroll() {
 		g2.drawImage(scroll_arrow, 470, 560, this);
 	}
@@ -216,11 +214,11 @@ public class MainFrame extends javax.swing.JFrame implements ActionListener {
 	private void drawSkipStop() {
 		g2.setColor(Color.LIGHT_GRAY);
 		g2.setFont(new Font("Loma", Font.BOLD, 18));
-		
+
 		g2.drawString("Skip", 520, 560);
 		g2.drawString("Stop", 520, 580);
 	}
-	
+
 	private void drawButton() {
 		g2.setColor(Color.LIGHT_GRAY);
 		g2.setStroke(new BasicStroke(2));

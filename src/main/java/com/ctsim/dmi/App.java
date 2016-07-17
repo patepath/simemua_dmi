@@ -10,8 +10,12 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.util.Iterator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 
 /**
  *
@@ -23,7 +27,10 @@ public class App {
 	private PrintWriter out;
 	private BufferedReader in;
 	private String msg;
-	
+
+	JSONParser parser;
+	JSONObject jsonObj;
+
 	public static double speed;
 
 	public App() {
@@ -31,42 +38,118 @@ public class App {
 	}
 
 	private void initConnection() {
+		Iterator<String> keys;
+		String key;
 		boolean isRegiester = false;
 
 		while (true) {
 
 			try {
-				socket = new Socket("192.168.1.10", 2510);
+				socket = new Socket("localhost", 2510);
 				out = new PrintWriter(socket.getOutputStream(), true);
 				in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 
 				while (true) {
-
 					if (0 < socket.getInputStream().available()) {
-						msg = in.readLine().toUpperCase().trim().replaceAll(" ", "");
-						
-						if(msg.split("=")[0].equals("SPEED")) {
-							speed = Double.parseDouble(msg.split("=")[1]);
+						parser = new JSONParser();
+						jsonObj = (JSONObject) parser.parse(in.readLine());
+
+						keys = jsonObj.keySet().iterator();
+
+						while (keys.hasNext()) {
+							key = keys.next();
+
+							switch (key) {
+								case "speed":
+									speed = (double) jsonObj.get("speed");
+									break;
+
+								case "atp_brake":
+									handleATPBrake();
+									break;
+
+								case "non_atp_brake":
+									handleNonATPBrake();
+									break;
+
+								case "target_distance":
+									handleTargetDistance();
+									break;
+
+								case "ato_status":
+									handleATOStatus();
+									break;
+
+								case "atenna_status":
+									handleAtennaStatus();
+									break;
+
+								case "door_indicator":
+									handleDoorIndicator();
+									break;
+
+								case "ceiling_speed":
+									handleCeilingSpeed();
+									break;
+
+								case "door_status":
+									handleDoorStatus();
+									break;
+
+								case "skipstop_status":
+									handleSkipStopStatus();
+									break;
+
+							}
 						}
-						
-						
-					} else if (!isRegiester) {
-						out.println("DMI");
+
+					} else if (!isRegiester) { // assign session id
+						out.println("SESSIONID=DMI");
 						out.flush();
 						isRegiester = true;
 					}
-
-					try {
-						Thread.sleep(100);
-					} catch (InterruptedException ex) {
-						Logger.getLogger(App.class.getName()).log(Level.SEVERE, null, ex);
-					}
 				}
 
-			} catch (IOException ex) {
+			} catch (IOException | ParseException ex) {
 				Logger.getLogger(App.class.getName()).log(Level.SEVERE, null, ex);
 			}
 		}
+	}
+
+	private void handleATPBrake() {
+
+	}
+
+	private void handleNonATPBrake() {
+
+	}
+
+	private void handleTargetDistance() {
+
+	}
+
+	private void handleATOStatus() {
+
+	}
+
+	private void handleAtennaStatus() {
+
+	}
+
+	private void handleDoorIndicator() {
+
+	}
+
+	private void handleCeilingSpeed() {
+
+	}
+
+	private void handleDoorStatus() {
+
+	}
+
+	private void handleSkipStopStatus() {
+
 	}
 
 	public void run() {
