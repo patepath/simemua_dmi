@@ -41,16 +41,16 @@ public class MainFrame extends javax.swing.JFrame implements ActionListener {
 	private Image speedoPinYellow;
 	private Image speedoPinRed;
 	private Image targetDestination;
-	private Image apt_status_auto;
-	private Image apt_status_mcs;
-	private Image apt_status_atb;
-	private Image apt_status_yard_sr;
-	private Image apt_status_yard_eoa;
-	private Image apt_status_line_sr;
-	private Image apt_status_rv;
-	private Image atena_yellow;
-	private Image atena_green;
-	private Image atena_fail;
+	private Image atp_status_auto;
+	private Image atp_status_mcs;
+	private Image atp_status_atb;
+	private Image atp_status_yard_sr;
+	private Image atp_status_yard_eoa;
+	private Image atp_status_line_sr;
+	private Image atp_status_rv;
+	private Image atenna_yellow;
+	private Image atenna_green;
+	private Image atenna_fail;
 	private Image ato_status_ok;
 	private Image ato_status_fail;
 	private Image door_indicator_both;
@@ -62,9 +62,19 @@ public class MainFrame extends javax.swing.JFrame implements ActionListener {
 	private Graphics2D g2;
 
 	private int x, y;
+	private final int bttnWidth = 90;
+	private final int bttnHeight = 70;
+	private int click_x, click_y;
 	private Calendar now;
 	private final SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
 	private final DecimalFormat df = new DecimalFormat("#,###");
+
+	private boolean bttnATB_click = false;
+	private boolean bttnAUTO_click = false;
+	private boolean bttnMCS_click = false;
+	private boolean bttnYARD_click = false;
+	private boolean iconATPBreak_click = false;
+	private boolean iconNonATPBreak_click = false;
 
 	/**
 	 * Creates new form MainFrame
@@ -83,16 +93,16 @@ public class MainFrame extends javax.swing.JFrame implements ActionListener {
 			speedoPinYellow = ImageIO.read(FileUtils.toFile(this.getClass().getClassLoader().getResource("img/speedo_pin_yellow.png")));
 			speedoPinRed = ImageIO.read(FileUtils.toFile(this.getClass().getClassLoader().getResource("img/speedo_pin_red.png")));
 			targetDestination = ImageIO.read(FileUtils.toFile(this.getClass().getClassLoader().getResource("img/target_destination.png")));
-			apt_status_auto = ImageIO.read(FileUtils.toFile(this.getClass().getClassLoader().getResource("img/atp_status_auto.png")));
-			apt_status_mcs = ImageIO.read(FileUtils.toFile(this.getClass().getClassLoader().getResource("img/atp_status_mcs.png")));
-			apt_status_atb = ImageIO.read(FileUtils.toFile(this.getClass().getClassLoader().getResource("img/atp_status_atb.png")));
-			apt_status_yard_sr = ImageIO.read(FileUtils.toFile(this.getClass().getClassLoader().getResource("img/atp_status_yard_sr.png")));
-			apt_status_yard_eoa = ImageIO.read(FileUtils.toFile(this.getClass().getClassLoader().getResource("img/atp_status_yard_eoa.png")));
-			apt_status_line_sr = ImageIO.read(FileUtils.toFile(this.getClass().getClassLoader().getResource("img/atp_status_line_sr.png")));
-			apt_status_rv = ImageIO.read(FileUtils.toFile(this.getClass().getClassLoader().getResource("img/atp_status_rv.png")));
-			atena_yellow = ImageIO.read(FileUtils.toFile(this.getClass().getClassLoader().getResource("img/atena_yellow.png")));
-			atena_green = ImageIO.read(FileUtils.toFile(this.getClass().getClassLoader().getResource("img/atena_green.png")));
-			atena_fail = ImageIO.read(FileUtils.toFile(this.getClass().getClassLoader().getResource("img/atena_fail.png")));
+			atp_status_auto = ImageIO.read(FileUtils.toFile(this.getClass().getClassLoader().getResource("img/atp_status_auto.png")));
+			atp_status_mcs = ImageIO.read(FileUtils.toFile(this.getClass().getClassLoader().getResource("img/atp_status_mcs.png")));
+			atp_status_atb = ImageIO.read(FileUtils.toFile(this.getClass().getClassLoader().getResource("img/atp_status_atb.png")));
+			atp_status_yard_sr = ImageIO.read(FileUtils.toFile(this.getClass().getClassLoader().getResource("img/atp_status_yard_sr.png")));
+			atp_status_yard_eoa = ImageIO.read(FileUtils.toFile(this.getClass().getClassLoader().getResource("img/atp_status_yard_eoa.png")));
+			atp_status_line_sr = ImageIO.read(FileUtils.toFile(this.getClass().getClassLoader().getResource("img/atp_status_line_sr.png")));
+			atp_status_rv = ImageIO.read(FileUtils.toFile(this.getClass().getClassLoader().getResource("img/atp_status_rv.png")));
+			atenna_yellow = ImageIO.read(FileUtils.toFile(this.getClass().getClassLoader().getResource("img/atena_yellow.png")));
+			atenna_green = ImageIO.read(FileUtils.toFile(this.getClass().getClassLoader().getResource("img/atena_green.png")));
+			atenna_fail = ImageIO.read(FileUtils.toFile(this.getClass().getClassLoader().getResource("img/atena_fail.png")));
 			ato_status_ok = ImageIO.read(FileUtils.toFile(this.getClass().getClassLoader().getResource("img/ato_status_ok.png")));
 			ato_status_fail = ImageIO.read(FileUtils.toFile(this.getClass().getClassLoader().getResource("img/ato_status_fail.png")));
 			door_indicator_both = ImageIO.read(FileUtils.toFile(this.getClass().getClassLoader().getResource("img/door_indicator_both.png")));
@@ -104,6 +114,44 @@ public class MainFrame extends javax.swing.JFrame implements ActionListener {
 		} catch (IOException ex) {
 			Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, ex);
 		}
+
+	}
+
+	private void operationLoop() {
+
+		if (bttnATB_click) {
+			App.outQueue.add("TRAIN {\"atp_status\":5}");
+			App.atpStatus = 5;
+			bttnATB_click = false;
+
+		} else if (bttnAUTO_click) {
+			App.outQueue.add("TRAIN {\"atp_status\":4}");
+			App.atpStatus = 4;
+			bttnAUTO_click = false;
+
+		} else if (bttnMCS_click) {
+			App.outQueue.add("TRAIN {\"atp_status\":3}");
+			App.atpStatus = 3;
+			bttnMCS_click = false;
+
+		} else if (bttnYARD_click) {
+			App.outQueue.add("TRAIN {\"atp_status\":1}");
+			App.atpStatus = 1;
+			bttnYARD_click = false;
+		}
+
+		if (App.atpBrake & iconATPBreak_click) {
+			App.outQueue.add("TRAIN {\"atp_brake\":false}");
+			App.atpBrake = false;
+		}
+		iconATPBreak_click = false;
+
+		if (App.nonAtpBrake & iconNonATPBreak_click) {
+			App.outQueue.add("TRAIN {\"non_atp_brake\":false}");
+			App.nonAtpBrake = false;
+		}
+		iconNonATPBreak_click = false;
+
 	}
 
 	private void initGraphics() {
@@ -122,7 +170,7 @@ public class MainFrame extends javax.swing.JFrame implements ActionListener {
 		drawScroll();
 		drawSkipStop();
 		drawID();
-		drawButton();
+		drawButtons();
 		drawTime();
 
 		drawColorBar();
@@ -130,15 +178,35 @@ public class MainFrame extends javax.swing.JFrame implements ActionListener {
 		g2.setColor(Color.GRAY);
 		g2.setFont(new Font("Loma", Font.PLAIN, 12));
 		g2.drawString("(" + x + ", " + y + ")", 20, 20);
+
+		operationLoop();
 	}
 
 	private void drawBrake() {
-		g2.drawImage(brake_indicator_red, 10, 525, this);
-		g2.drawImage(brake_indicator_yellow, 10, 565, this);
+		if (App.atpBrake) {
+			g2.drawImage(brake_indicator_red, 10, 525, this);
+		}
+
+		if (App.nonAtpBrake) {
+			g2.drawImage(brake_indicator_yellow, 10, 565, this);
+		}
 	}
 
 	private void drawTargetDestance() {
+		String str = df.format(App.targetDistance) + " m.";
+		int strWidth;
+		double barHeight;
+
 		g2.drawImage(targetDestination, 30, 90, this);
+
+		g2.setColor(Color.GREEN);
+		g2.setFont(new Font("Loma", Font.PLAIN, 18));
+		FontMetrics metrics = g2.getFontMetrics();
+		strWidth = metrics.stringWidth(str);
+		g2.drawString(str, 40 - (strWidth / 2), 70);
+
+		barHeight = (App.targetDistanceActual / App.targetDistance) * 360;
+		g2.fillRect(52, (int) (450 - barHeight), 14, (int) barHeight);
 	}
 
 	private void drawPin() {
@@ -157,6 +225,7 @@ public class MainFrame extends javax.swing.JFrame implements ActionListener {
 
 		// Draw actual speed
 		g2.setFont(new Font("Loma", Font.BOLD, 30));
+		g2.setColor(Color.BLACK);
 		FontMetrics metrics = g2.getFontMetrics();
 		strWidth = metrics.stringWidth(speedShow);
 
@@ -165,7 +234,7 @@ public class MainFrame extends javax.swing.JFrame implements ActionListener {
 
 	private void drawCeillingSpeed() {
 		int strWidth;
-		String speedShow = "0";
+		String speedShow = df.format(App.ceilingSpeed);
 
 		g2.setColor(Color.RED);
 		g2.setFont(new Font("Loma", Font.BOLD, 50));
@@ -173,6 +242,12 @@ public class MainFrame extends javax.swing.JFrame implements ActionListener {
 		strWidth = metrics.stringWidth(speedShow);
 
 		g2.drawString(String.valueOf(speedShow), 306 - strWidth / 2, 535);
+
+		g2.setColor(Color.GREEN);
+		g2.setStroke(new BasicStroke(15));
+
+		int arc = (int) (App.ceilingSpeed * 2.76);
+		g2.drawArc(90, 40, 430, 430, 228 - arc, arc);
 	}
 
 	private double getPinAngle(double speed) {
@@ -184,27 +259,95 @@ public class MainFrame extends javax.swing.JFrame implements ActionListener {
 	}
 
 	private void drawATOStatus() {
-		g2.drawImage(ato_status_fail, 220, 430, this);
+		Image img;
+
+		if (App.atpStatus == 0) {
+			img = ato_status_fail;
+		} else {
+			img = ato_status_ok;
+		}
+		g2.drawImage(img, 220, 430, this);
 	}
 
 	private void drawAtenna() {
-		g2.drawImage(atena_yellow, 281, 430, this);
+		Image img;
+
+		switch (App.atennaStatus) {
+
+			case 1:
+				img = atenna_yellow;
+				break;
+
+			case 2:
+				img = atenna_green;
+				break;
+
+			default:
+				img = atenna_fail;
+				break;
+		}
+
+		g2.drawImage(img, 281, 430, this);
 	}
 
 	private void drawATPStatus() {
-		g2.setColor(Color.LIGHT_GRAY);
-		g2.setStroke(new BasicStroke(2));
+		Image img;
 
-		g2.drawImage(apt_status_mcs, 450, 430, this);
-		//g2.drawRect(450, 430, 50, 50);
+		switch (App.atpStatus) {
+			case 1:
+				img = atp_status_yard_sr;
+				break;
+			case 2:
+				img = atp_status_yard_eoa;
+				break;
+			case 3:
+				img = atp_status_mcs;
+				break;
+			case 4:
+				img = atp_status_auto;
+				break;
+			case 5:
+				img = atp_status_atb;
+				break;
+			case 6:
+				img = atp_status_line_sr;
+				break;
+			default:
+				img = atp_status_rv;
+		}
+
+		g2.drawImage(img, 450, 430, this);
 	}
 
 	private void drawDoorIndicator() {
-		g2.drawImage(door_indicator_right, 520, 490, this);
+		Image img;
+
+		switch (App.doorIndicator) {
+			case 1:
+				img = door_indicator_right;
+				break;
+
+			case 2:
+				img = door_indicator_left;
+				break;
+
+			default:
+				img = door_indicator_both;
+		}
+
+		g2.drawImage(img, 520, 490, this);
 	}
 
 	private void drawDoorStatus() {
-		g2.drawImage(door_status_open, 565, 483, this);
+		Image img;
+
+		if (App.doorStatus) {
+			img = door_status_open;
+		} else {
+			img = door_status_close;
+		}
+
+		g2.drawImage(img, 565, 483, this);
 	}
 
 	private void drawScroll() {
@@ -219,42 +362,55 @@ public class MainFrame extends javax.swing.JFrame implements ActionListener {
 		g2.drawString("Stop", 520, 580);
 	}
 
-	private void drawButton() {
-		g2.setColor(Color.LIGHT_GRAY);
+	private void drawButtons() {
+		int bttn_x = 900;
+		int bttn_y = 20;
+		g2.setFont(new Font("Loma", Font.BOLD, 25));
 		g2.setStroke(new BasicStroke(2));
 
-		g2.setFont(new Font("Loma", Font.BOLD, 25));
+		drawButton("ATB", 5, bttn_x, bttn_y);
+		drawButton("AUTO", 4, bttn_x, bttn_y += 75);
+		drawButton("MCS", 3, bttn_x, bttn_y += 75);
+		drawButtonYard(bttn_x, bttn_y += 75);
+
+		bttn_y = 575;
+		drawButton("Data", 8, bttn_x, bttn_y);
+		drawButton("Spec", 9, bttn_x, bttn_y += 75);
+	}
+
+	private void drawButton(String name, int status, int x, int y) {
+
 		FontMetrics metrics = g2.getFontMetrics();
-		String bttnName = "ATB";
-		int strWidth = metrics.stringWidth(bttnName);
+		int strWidth = metrics.stringWidth(name);
+		int width = 90;
+		int height = 70;
 
-		g2.drawRect(900, 20, 90, 70);
-		g2.drawString(bttnName, 945 - strWidth / 2, 65);
+		if (App.atpStatus == status) {
+			g2.setColor(Color.GREEN);
+			g2.fillRect(x, y, width, height);
+			g2.setColor(Color.BLACK);
 
-		bttnName = "AUTO";
-		strWidth = metrics.stringWidth(bttnName);
-		g2.drawRect(900, 95, 90, 70);
-		g2.drawString(bttnName, 945 - strWidth / 2, 140);
+		} else {
+			g2.setColor(Color.LIGHT_GRAY);
+			g2.drawRect(x, y, width, height);
+		}
+		g2.drawString(name, x + (width / 2) - strWidth / 2, y + height - 5 - metrics.getHeight() / 2);
+	}
 
-		bttnName = "MCS";
-		strWidth = metrics.stringWidth(bttnName);
-		g2.drawRect(900, 170, 90, 70);
-		g2.drawString(bttnName, 945 - strWidth / 2, 215);
+	private void drawButtonYard(int x, int y) {
+		FontMetrics metrics = g2.getFontMetrics();
+		int strWidth = metrics.stringWidth("Yard");
 
-		bttnName = "Yard";
-		strWidth = metrics.stringWidth(bttnName);
-		g2.drawRect(900, 245, 90, 70);
-		g2.drawString(bttnName, 945 - strWidth / 2, 290);
+		if (0 < App.atpStatus & App.atpStatus < 3) {
+			g2.setColor(Color.GREEN);
+			g2.fillRect(x, y, bttnWidth, bttnHeight);
+			g2.setColor(Color.BLACK);
 
-		bttnName = "Data";
-		strWidth = metrics.stringWidth(bttnName);
-		g2.drawRect(900, 575, 90, 70);
-		g2.drawString(bttnName, 945 - strWidth / 2, 620);
-
-		bttnName = "Spec";
-		strWidth = metrics.stringWidth(bttnName);
-		g2.drawRect(900, 650, 90, 70);
-		g2.drawString(bttnName, 945 - strWidth / 2, 695);
+		} else {
+			g2.setColor(Color.LIGHT_GRAY);
+			g2.drawRect(x, y, bttnWidth, bttnHeight);
+		}
+		g2.drawString("Yard", x + (bttnWidth / 2) - strWidth / 2, y + bttnHeight - 5 - metrics.getHeight() / 2);
 	}
 
 	private void drawID() {
@@ -314,6 +470,11 @@ public class MainFrame extends javax.swing.JFrame implements ActionListener {
                 viewPanelMouseMoved(evt);
             }
         });
+        viewPanel.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                viewPanelMouseClicked(evt);
+            }
+        });
 
         javax.swing.GroupLayout viewPanelLayout = new javax.swing.GroupLayout(viewPanel);
         viewPanel.setLayout(viewPanelLayout);
@@ -346,6 +507,29 @@ public class MainFrame extends javax.swing.JFrame implements ActionListener {
 		this.y = evt.getY();
     }//GEN-LAST:event_viewPanelMouseMoved
 
+	private void checkClickObject() {
+		int bttn_x = 900;
+		int bttn_y = 20;
+
+		bttnATB_click = click_x >= bttn_x & click_x <= bttn_x + bttnWidth & click_y >= bttn_y & click_y <= bttn_y + bttnHeight;
+		bttn_y += 75;
+		bttnAUTO_click = click_x >= bttn_x & click_x <= bttn_x + bttnWidth & click_y >= bttn_y & click_y <= bttn_y + bttnHeight;
+		bttn_y += 75;
+		bttnMCS_click = click_x >= bttn_x & click_x <= bttn_x + bttnWidth & click_y >= bttn_y & click_y <= bttn_y + bttnHeight;
+		bttn_y += 75;
+		bttnYARD_click = click_x >= bttn_x & click_x <= bttn_x + bttnWidth & click_y >= bttn_y & click_y <= bttn_y + bttnHeight;
+
+		iconATPBreak_click = click_x >= 10 & click_x <= 80 & click_y >= 525 & click_y <= 560;
+		iconNonATPBreak_click = click_x >= 10 & click_x <= 80 & click_y >= 565 & click_y <= 600;
+	}
+
+    private void viewPanelMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_viewPanelMouseClicked
+		click_x = evt.getX();
+		click_y = evt.getY();
+
+		checkClickObject();
+    }//GEN-LAST:event_viewPanelMouseClicked
+
 	/**
 	 * @param args the command line arguments
 	 */
@@ -360,10 +544,12 @@ public class MainFrame extends javax.swing.JFrame implements ActionListener {
 				if ("Nimbus".equals(info.getName())) {
 					javax.swing.UIManager.setLookAndFeel(info.getClassName());
 					break;
+
 				}
 			}
 		} catch (ClassNotFoundException | InstantiationException | IllegalAccessException | javax.swing.UnsupportedLookAndFeelException ex) {
-			java.util.logging.Logger.getLogger(MainFrame.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+			java.util.logging.Logger.getLogger(MainFrame.class
+				.getName()).log(java.util.logging.Level.SEVERE, null, ex);
 		}
 		//</editor-fold>
 

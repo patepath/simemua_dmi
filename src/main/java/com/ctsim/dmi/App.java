@@ -11,6 +11,8 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.util.Iterator;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.json.simple.JSONObject;
@@ -28,10 +30,24 @@ public class App {
 	private BufferedReader in;
 	private String msg;
 
+	public static BlockingQueue<String> outQueue = new LinkedBlockingQueue<>();
+
 	JSONParser parser;
 	JSONObject jsonObj;
 
 	public static double speed;
+	public static boolean atpBrake;
+	public static boolean nonAtpBrake;
+	public static double targetDistance;
+	public static double targetDistanceActual;
+	public static double ceilingSpeed;
+	public static int atpStatus;
+	public static int atennaStatus;
+	public static int doorIndicator;
+	public static boolean doorStatus;
+	public static int dwell;
+	public static int skipstopStatus;
+	public static int mode;
 
 	public App() {
 
@@ -65,39 +81,51 @@ public class App {
 									break;
 
 								case "atp_brake":
-									handleATPBrake();
+									handleATPBrake((boolean) jsonObj.get("atp_brake"));
 									break;
 
 								case "non_atp_brake":
-									handleNonATPBrake();
+									handleNonATPBrake((boolean) jsonObj.get("non_atp_brake"));
 									break;
 
 								case "target_distance":
-									handleTargetDistance();
+									handleTargetDistance((double) jsonObj.get("target_distance"));
 									break;
 
-								case "ato_status":
-									handleATOStatus();
-									break;
-
-								case "atenna_status":
-									handleAtennaStatus();
-									break;
-
-								case "door_indicator":
-									handleDoorIndicator();
+								case "target_distance_actual":
+									handleTargetDistanceActual((double) jsonObj.get("target_distance_actual"));
 									break;
 
 								case "ceiling_speed":
-									handleCeilingSpeed();
+									handleCeilingSpeed((double) jsonObj.get("ceiling_speed"));
+									break;
+
+								case "atp_status":
+									handleATOStatus((int) (long) jsonObj.get("atp_status"));
+									break;
+
+								case "atenna_status":
+									handleAtennaStatus((int) (long) jsonObj.get("atenna_status"));
+									break;
+
+								case "door_indicator":
+									handleDoorIndicator((int) (long) jsonObj.get("door_indicator"));
 									break;
 
 								case "door_status":
-									handleDoorStatus();
+									handleDoorStatus((boolean) jsonObj.get("door_status"));
 									break;
 
 								case "skipstop_status":
-									handleSkipStopStatus();
+									handleSkipStopStatus((int) (long) jsonObj.get("skipstop_status"));
+									break;
+
+								case "dwell":
+									handleDwell((int) (long) jsonObj.get("dwell"));
+									break;
+
+								case "mode":
+									handleMode((int) (long) jsonObj.get("mode"));
 									break;
 
 							}
@@ -107,6 +135,15 @@ public class App {
 						out.println("SESSIONID=DMI");
 						out.flush();
 						isRegiester = true;
+						
+					} else {
+						while (!outQueue.isEmpty()) {
+							msg = outQueue.poll();
+							out.println(msg);
+							out.flush();
+							
+							System.out.println(msg);
+						}
 					}
 				}
 
@@ -116,40 +153,52 @@ public class App {
 		}
 	}
 
-	private void handleATPBrake() {
-
+	private void handleATPBrake(boolean isBrake) {
+		App.atpBrake = isBrake;
 	}
 
-	private void handleNonATPBrake() {
-
+	private void handleNonATPBrake(boolean isBrake) {
+		App.nonAtpBrake = isBrake;
 	}
 
-	private void handleTargetDistance() {
-
+	private void handleTargetDistance(double distance) {
+		App.targetDistance = distance;
 	}
 
-	private void handleATOStatus() {
-
+	private void handleTargetDistanceActual(double distance) {
+		App.targetDistanceActual = distance;
 	}
 
-	private void handleAtennaStatus() {
-
+	private void handleATOStatus(int status) {
+		App.atpStatus = status;
 	}
 
-	private void handleDoorIndicator() {
-
+	private void handleAtennaStatus(int status) {
+		App.atennaStatus = status;
 	}
 
-	private void handleCeilingSpeed() {
-
+	private void handleDoorIndicator(int status) {
+		App.doorIndicator = status;
 	}
 
-	private void handleDoorStatus() {
-
+	private void handleCeilingSpeed(double speed) {
+		App.ceilingSpeed = speed;
 	}
 
-	private void handleSkipStopStatus() {
+	private void handleDoorStatus(boolean status) {
+		App.doorStatus = status;
+	}
 
+	private void handleDwell(int dwell) {
+		App.dwell = dwell;
+	}
+
+	private void handleSkipStopStatus(int status) {
+		App.skipstopStatus = status;
+	}
+
+	private void handleMode(int mode) {
+		App.mode = mode;
 	}
 
 	public void run() {
