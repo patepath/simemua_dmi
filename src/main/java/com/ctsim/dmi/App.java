@@ -58,18 +58,18 @@ public class App {
 		String key;
 		boolean isRegiester = false;
 
-		while (true) {
+		parser = new JSONParser();
 
-			try {
-				socket = new Socket("localhost", 2510);
-				out = new PrintWriter(socket.getOutputStream(), true);
-				in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+		try {
+			socket = new Socket("localhost", 2510);
+			out = new PrintWriter(socket.getOutputStream(), true);
+			in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 
-				while (true) {
-					if (0 < socket.getInputStream().available()) {
-						parser = new JSONParser();
+			while (true) {
+				if (0 < socket.getInputStream().available()) {
+
+					try {
 						jsonObj = (JSONObject) parser.parse(in.readLine());
-
 						keys = jsonObj.keySet().iterator();
 
 						while (keys.hasNext()) {
@@ -127,29 +127,29 @@ public class App {
 								case "mode":
 									handleMode((int) (long) jsonObj.get("mode"));
 									break;
-
 							}
 						}
 
-					} else if (!isRegiester) { // assign session id
-						out.println("SESSIONID=DMI");
+					} catch (ParseException ex) {
+						Logger.getLogger(App.class.getName()).log(Level.SEVERE, null, ex);
+					}
+
+				} else if (!isRegiester) { // assign session id
+					out.println("SESSIONID=DMI");
+					out.flush();
+					isRegiester = true;
+
+				} else {
+					while (!outQueue.isEmpty()) {
+						msg = outQueue.poll();
+						out.println(msg);
 						out.flush();
-						isRegiester = true;
-						
-					} else {
-						while (!outQueue.isEmpty()) {
-							msg = outQueue.poll();
-							out.println(msg);
-							out.flush();
-							
-							System.out.println(msg);
-						}
 					}
 				}
-
-			} catch (IOException | ParseException ex) {
-				Logger.getLogger(App.class.getName()).log(Level.SEVERE, null, ex);
 			}
+
+		} catch (IOException ex) {
+			Logger.getLogger(App.class.getName()).log(Level.SEVERE, null, ex);
 		}
 	}
 
