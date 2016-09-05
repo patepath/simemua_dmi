@@ -41,6 +41,7 @@ public class MainFrame extends javax.swing.JFrame implements ActionListener {
 	private Image speedoPinYellow;
 	private Image speedoPinRed;
 	private Image targetDestination;
+	private Image atp_blank;
 	private Image atp_status_auto;
 	private Image atp_status_mcs;
 	private Image atp_status_atb;
@@ -66,6 +67,10 @@ public class MainFrame extends javax.swing.JFrame implements ActionListener {
 	private final int bttnHeight = 70;
 	private int click_x, click_y;
 	private Calendar now;
+
+	private Calendar t1, t2;
+	private boolean isFlashOn;
+
 	private final SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
 	private final DecimalFormat df = new DecimalFormat("#,###");
 
@@ -76,6 +81,7 @@ public class MainFrame extends javax.swing.JFrame implements ActionListener {
 	private boolean iconATPBreak_click = false;
 	private boolean iconNonATPBreak_click = false;
 
+	//private boolean isTurnOn;
 	/**
 	 * Creates new form MainFrame
 	 */
@@ -84,6 +90,8 @@ public class MainFrame extends javax.swing.JFrame implements ActionListener {
 
 		timer = new Timer(30, this);
 		timer.start();
+
+		t1 = Calendar.getInstance();
 
 		try {
 			brake_indicator_yellow = ImageIO.read(FileUtils.toFile(this.getClass().getClassLoader().getResource("img/brake_indicator_yellow.png")));
@@ -100,6 +108,7 @@ public class MainFrame extends javax.swing.JFrame implements ActionListener {
 			atp_status_yard_eoa = ImageIO.read(FileUtils.toFile(this.getClass().getClassLoader().getResource("img/atp_status_yard_eoa.png")));
 			atp_status_line_sr = ImageIO.read(FileUtils.toFile(this.getClass().getClassLoader().getResource("img/atp_status_line_sr.png")));
 			atp_status_rv = ImageIO.read(FileUtils.toFile(this.getClass().getClassLoader().getResource("img/atp_status_rv.png")));
+			atp_blank = ImageIO.read(FileUtils.toFile(this.getClass().getClassLoader().getResource("img/atp_blank.png")));
 			atenna_yellow = ImageIO.read(FileUtils.toFile(this.getClass().getClassLoader().getResource("img/atena_yellow.png")));
 			atenna_green = ImageIO.read(FileUtils.toFile(this.getClass().getClassLoader().getResource("img/atena_green.png")));
 			atenna_fail = ImageIO.read(FileUtils.toFile(this.getClass().getClassLoader().getResource("img/atena_fail.png")));
@@ -117,74 +126,98 @@ public class MainFrame extends javax.swing.JFrame implements ActionListener {
 
 	}
 
-	private void operationLoop() {
+	private void handleClick() {
 
 		if (bttnATB_click) {
-			App.outQueue.add("TRAIN {\"atp_status\":5}");
+			App.outQueue.add("{\"ATP_STATUS\":5}");
 			App.atpStatus = 5;
 			bttnATB_click = false;
+			disableAllBttn();
 
 		} else if (bttnAUTO_click) {
-			App.outQueue.add("TRAIN {\"atp_status\":4}");
+			App.outQueue.add("{\"ATP_STATUS\":4}");
 			App.atpStatus = 4;
 			bttnAUTO_click = false;
+			disableAllBttn();
 
 		} else if (bttnMCS_click) {
-			App.outQueue.add("TRAIN {\"atp_status\":3}");
+			App.outQueue.add("{\"ATP_STATUS\":3}");
 			App.atpStatus = 3;
 			bttnMCS_click = false;
+			disableAllBttn();
 
 		} else if (bttnYARD_click) {
-			App.outQueue.add("TRAIN {\"atp_status\":1}");
+			App.outQueue.add("{\"ATP_STATUS\":1}");
 			App.atpStatus = 1;
 			bttnYARD_click = false;
+			disableAllBttn();
 		}
 
-		if (App.atpBrake & iconATPBreak_click) {
-			App.outQueue.add("TRAIN {\"atp_brake\":false}");
-			App.atpBrake = false;
+		if (App.atpBrake == 2 & iconATPBreak_click) {
+			App.outQueue.add("{\"ATP_BRAKE\":0}");
+			App.atpBrake = 0;
 		}
 		iconATPBreak_click = false;
 
 		if (App.nonAtpBrake & iconNonATPBreak_click) {
-			App.outQueue.add("TRAIN {\"non_atp_brake\":false}");
+			App.outQueue.add("{\"NON_ATP_BRAKE\":false}");
 			App.nonAtpBrake = false;
 		}
 		iconNonATPBreak_click = false;
+	}
 
+	private void disableAllBttn() {
+		App.isReqBttnATB = false;
+		App.isReqBttnMCS = false;
+		App.isReqBttnAUTO = false;
+		App.isReqBttnYARD = false;
 	}
 
 	private void initGraphics() {
 		g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-		g2.drawImage(speedoDial, 100, 50, this);
 
-		drawBrake();
-		drawTargetDestance();
-		drawPin();
-		drawATOStatus();
-		drawAtenna();
-		drawATPStatus();
-		drawDoorIndicator();
-		drawCeillingSpeed();
-		drawDoorStatus();
-		drawScroll();
-		drawSkipStop();
-		drawID();
-		drawButtons();
-		drawTime();
+		if (App.isTurnOn) {
+			g2.drawImage(speedoDial, 100, 50, this);
 
-		drawColorBar();
+			t2 = Calendar.getInstance();
+			if (t2.getTimeInMillis() - t1.getTimeInMillis() > 300) {
+				isFlashOn = !isFlashOn;
+				t1 = Calendar.getInstance();
+			}
 
-		g2.setColor(Color.GRAY);
-		g2.setFont(new Font("Loma", Font.PLAIN, 12));
-		g2.drawString("(" + x + ", " + y + ")", 20, 20);
+			drawBrake();
+			drawTargetDestance();
+			drawPin();
+			drawATOStatus();
+			drawAtenna();
+			drawATPStatus();
+			drawDoorIndicator();
+			drawCeillingSpeed();
+			drawDoorStatus();
+			drawScroll();
+			drawSkipStop();
+			drawID();
+			drawButtons();
+			drawTime();
 
-		operationLoop();
+			drawColorBar();
+
+			g2.setColor(Color.GRAY);
+			g2.setFont(new Font("Loma", Font.PLAIN, 12));
+			g2.drawString("(" + x + ", " + y + ")", 20, 20);
+
+			//operationLoop();
+		}
 	}
 
 	private void drawBrake() {
-		if (App.atpBrake) {
+		if (App.atpBrake == 1) {
 			g2.drawImage(brake_indicator_red, 10, 525, this);
+
+		} else if (App.atpBrake == 2) {
+			if (isFlashOn) {
+				g2.drawImage(brake_indicator_red, 10, 525, this);
+			}
 		}
 
 		if (App.nonAtpBrake) {
@@ -261,10 +294,10 @@ public class MainFrame extends javax.swing.JFrame implements ActionListener {
 	private void drawATOStatus() {
 		Image img;
 
-		if (App.atpStatus == 0) {
-			img = ato_status_fail;
-		} else {
+		if (App.isATOon) {
 			img = ato_status_ok;
+		} else {
+			img = ato_status_fail;
 		}
 		g2.drawImage(img, 220, 430, this);
 	}
@@ -312,8 +345,20 @@ public class MainFrame extends javax.swing.JFrame implements ActionListener {
 			case 6:
 				img = atp_status_line_sr;
 				break;
-			default:
+			case 7:
 				img = atp_status_rv;
+				break;
+
+			case 8:
+				img = atp_blank;
+				break;
+
+			case 9:
+				img = atp_blank;
+				break;
+
+			default:
+				img = atp_blank;
 		}
 
 		g2.drawImage(img, 450, 430, this);
@@ -368,48 +413,70 @@ public class MainFrame extends javax.swing.JFrame implements ActionListener {
 		g2.setFont(new Font("Loma", Font.BOLD, 25));
 		g2.setStroke(new BasicStroke(2));
 
-		drawButton("ATB", 5, bttn_x, bttn_y);
-		drawButton("AUTO", 4, bttn_x, bttn_y += 75);
-		drawButton("MCS", 3, bttn_x, bttn_y += 75);
-		drawButtonYard(bttn_x, bttn_y += 75);
+		drawButton("ATB", 5, bttn_x, bttn_y, App.isReqBttnATB);
+		drawButton("AUTO", 4, bttn_x, bttn_y += 75, App.isReqBttnAUTO);
+		drawButton("MCS", 3, bttn_x, bttn_y += 75, App.isReqBttnMCS);
+		drawButtonYard(bttn_x, bttn_y += 75, App.isReqBttnYARD);
 
 		bttn_y = 575;
-		drawButton("Data", 8, bttn_x, bttn_y);
-		drawButton("Spec", 9, bttn_x, bttn_y += 75);
+		drawButton("Data", 8, bttn_x, bttn_y, false);
+		drawButton("Spec", 9, bttn_x, bttn_y += 75, false);
 	}
 
-	private void drawButton(String name, int status, int x, int y) {
+	private void drawButton(String name, int status, int x, int y, boolean isRequest) {
 
 		FontMetrics metrics = g2.getFontMetrics();
 		int strWidth = metrics.stringWidth(name);
-		int width = 90;
-		int height = 70;
+		g2.setStroke(new BasicStroke(2));
 
 		if (App.atpStatus == status) {
-			g2.setColor(Color.GREEN);
-			g2.fillRect(x, y, width, height);
-			g2.setColor(Color.BLACK);
-
-		} else {
-			g2.setColor(Color.LIGHT_GRAY);
-			g2.drawRect(x, y, width, height);
-		}
-		g2.drawString(name, x + (width / 2) - strWidth / 2, y + height - 5 - metrics.getHeight() / 2);
-	}
-
-	private void drawButtonYard(int x, int y) {
-		FontMetrics metrics = g2.getFontMetrics();
-		int strWidth = metrics.stringWidth("Yard");
-
-		if (0 < App.atpStatus & App.atpStatus < 3) {
 			g2.setColor(Color.GREEN);
 			g2.fillRect(x, y, bttnWidth, bttnHeight);
 			g2.setColor(Color.BLACK);
 
+		} else if(isRequest){
+			if (isFlashOn) {
+				g2.setStroke(new BasicStroke(4));
+				g2.setColor(Color.YELLOW);
+			} else {
+				g2.setStroke(new BasicStroke(2));
+				g2.setColor(Color.LIGHT_GRAY);
+			}
+			
 		} else {
+			g2.setStroke(new BasicStroke(2));
 			g2.setColor(Color.LIGHT_GRAY);
-			g2.drawRect(x, y, bttnWidth, bttnHeight);
 		}
+		
+		g2.drawRect(x, y, bttnWidth, bttnHeight);
+		g2.drawString(name, x + (bttnWidth / 2) - strWidth / 2, y + bttnHeight - 5 - metrics.getHeight() / 2);
+	}
+
+	private void drawButtonYard(int x, int y, boolean isRequest) {
+		FontMetrics metrics = g2.getFontMetrics();
+		int strWidth = metrics.stringWidth("Yard");
+
+		if (App.atpStatus == 1) {
+			g2.setColor(Color.GREEN);
+			g2.fillRect(x, y, bttnWidth, bttnHeight);
+			g2.setColor(Color.BLACK);
+
+		} else if (isRequest) {
+
+			if (isFlashOn) {
+				g2.setStroke(new BasicStroke(4));
+				g2.setColor(Color.YELLOW);
+			} else {
+				g2.setStroke(new BasicStroke(2));
+				g2.setColor(Color.LIGHT_GRAY);
+			}
+
+		} else {
+			g2.setStroke(new BasicStroke(2));
+			g2.setColor(Color.LIGHT_GRAY);
+		}
+
+		g2.drawRect(x, y, bttnWidth, bttnHeight);
 		g2.drawString("Yard", x + (bttnWidth / 2) - strWidth / 2, y + bttnHeight - 5 - metrics.getHeight() / 2);
 	}
 
@@ -511,16 +578,18 @@ public class MainFrame extends javax.swing.JFrame implements ActionListener {
 		int bttn_x = 900;
 		int bttn_y = 20;
 
-		bttnATB_click = click_x >= bttn_x & click_x <= bttn_x + bttnWidth & click_y >= bttn_y & click_y <= bttn_y + bttnHeight;
+		bttnATB_click = click_x >= bttn_x & click_x <= bttn_x + bttnWidth & click_y >= bttn_y & click_y <= bttn_y + bttnHeight & App.isReqBttnATB;
 		bttn_y += 75;
-		bttnAUTO_click = click_x >= bttn_x & click_x <= bttn_x + bttnWidth & click_y >= bttn_y & click_y <= bttn_y + bttnHeight;
+		bttnAUTO_click = click_x >= bttn_x & click_x <= bttn_x + bttnWidth & click_y >= bttn_y & click_y <= bttn_y + bttnHeight & App.isReqBttnAUTO;
 		bttn_y += 75;
-		bttnMCS_click = click_x >= bttn_x & click_x <= bttn_x + bttnWidth & click_y >= bttn_y & click_y <= bttn_y + bttnHeight;
+		bttnMCS_click = click_x >= bttn_x & click_x <= bttn_x + bttnWidth & click_y >= bttn_y & click_y <= bttn_y + bttnHeight & App.isReqBttnMCS;
 		bttn_y += 75;
-		bttnYARD_click = click_x >= bttn_x & click_x <= bttn_x + bttnWidth & click_y >= bttn_y & click_y <= bttn_y + bttnHeight;
+		bttnYARD_click = click_x >= bttn_x & click_x <= bttn_x + bttnWidth & click_y >= bttn_y & click_y <= bttn_y + bttnHeight & App.isReqBttnYARD;
 
 		iconATPBreak_click = click_x >= 10 & click_x <= 80 & click_y >= 525 & click_y <= 560;
 		iconNonATPBreak_click = click_x >= 10 & click_x <= 80 & click_y >= 565 & click_y <= 600;
+
+		handleClick();
 	}
 
     private void viewPanelMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_viewPanelMouseClicked

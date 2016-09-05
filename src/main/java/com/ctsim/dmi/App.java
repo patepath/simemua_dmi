@@ -35,25 +35,37 @@ public class App {
 	JSONParser parser;
 	JSONObject jsonObj;
 
+	public static boolean isTurnOn;
 	public static double speed;
-	public static boolean atpBrake;
+	public static int atpBrake;
 	public static boolean nonAtpBrake;
 	public static double targetDistance;
 	public static double targetDistanceActual;
 	public static double ceilingSpeed;
 	public static int atpStatus;
+	public static boolean isATOon = false;
 	public static int atennaStatus;
 	public static int doorIndicator;
 	public static boolean doorStatus;
-	public static int dwell;
+	public static int DWELL;
 	public static int skipstopStatus;
-	public static int mode;
+	public static int MODE;
+
+	public static boolean isReqBttnATB = false;
+	public static boolean isReqBttnMCS = false;
+	public static boolean isReqBttnAUTO = false;
+	public static boolean isReqBttnYARD = false;
 
 	public App() {
 
 	}
 
+	public void run() {
+		initConnection();
+	}
+
 	private void initConnection() {
+
 		Iterator<String> keys;
 		String key;
 		boolean isRegiester = false;
@@ -61,7 +73,7 @@ public class App {
 		parser = new JSONParser();
 
 		try {
-			socket = new Socket("localhost", 2510);
+			socket = new Socket("192.168.1.10", 2510);
 			out = new PrintWriter(socket.getOutputStream(), true);
 			in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 
@@ -76,56 +88,101 @@ public class App {
 							key = keys.next();
 
 							switch (key) {
-								case "speed":
-									speed = (double) jsonObj.get("speed");
+								case "IS_TURNON":
+									isTurnOn = (boolean) jsonObj.get("IS_TURNON");
+
+									if (!isTurnOn) {
+										atpStatus = 0;
+									}
+
 									break;
 
-								case "atp_brake":
-									handleATPBrake((boolean) jsonObj.get("atp_brake"));
+								case "DISABLE_BUTTON":
+									System.out.println("disable button");
+
+									isReqBttnYARD = false;
+									isReqBttnMCS = false;
+									isReqBttnAUTO = false;
+									isReqBttnATB = false;
 									break;
 
-								case "non_atp_brake":
-									handleNonATPBrake((boolean) jsonObj.get("non_atp_brake"));
+								case "REQ_MODE":
+									int value = (int) (long) jsonObj.get("REQ_MODE");
+
+									switch (value) {
+										case 1:
+											isReqBttnYARD = true;
+											break;
+
+										case 3:
+											isReqBttnMCS = true;
+											break;
+
+										case 4:
+											isReqBttnAUTO = true;
+											break;
+
+										case 5:
+											isReqBttnATB = true;
+											break;
+									}
+
 									break;
 
-								case "target_distance":
-									handleTargetDistance((double) jsonObj.get("target_distance"));
+								case "SPEED":
+									try {
+										speed = (double) jsonObj.get(key);
+									} catch (Exception ex) {
+
+									}
 									break;
 
-								case "target_distance_actual":
-									handleTargetDistanceActual((double) jsonObj.get("target_distance_actual"));
+								case "ATP_BRAKE":
+									handleATPBrake((int) (long) jsonObj.get("ATP_BRAKE"));
 									break;
 
-								case "ceiling_speed":
-									handleCeilingSpeed((double) jsonObj.get("ceiling_speed"));
+								case "NON_ATP_BRAKE":
+									handleNonATPBrake((boolean) jsonObj.get("NON_ATP_BRAKE"));
 									break;
 
-								case "atp_status":
-									handleATOStatus((int) (long) jsonObj.get("atp_status"));
+								case "TARGET_DISTANCE":
+									handleTargetDistance((double) jsonObj.get("TARGET_DISTANCE"));
 									break;
 
-								case "atenna_status":
-									handleAtennaStatus((int) (long) jsonObj.get("atenna_status"));
+								case "TARGET_DISTANCE_ACTUAL":
+									handleTargetDistanceActual((double) jsonObj.get("TARGET_DISTANCE_ACTUAL"));
 									break;
 
-								case "door_indicator":
-									handleDoorIndicator((int) (long) jsonObj.get("door_indicator"));
+								case "CEILING_SPEED":
+									handleCeilingSpeed((double) jsonObj.get("CEILING_SPEED"));
 									break;
 
-								case "door_status":
-									handleDoorStatus((boolean) jsonObj.get("door_status"));
+								case "ATP_STATUS":
+									handleATOStatus((int) (long) jsonObj.get("ATP_STATUS"));
 									break;
 
-								case "skipstop_status":
-									handleSkipStopStatus((int) (long) jsonObj.get("skipstop_status"));
+								case "ATENNA_STATUS":
+									handleAtennaStatus((int) (long) jsonObj.get("ATENNA_STATUS"));
 									break;
 
-								case "dwell":
-									handleDwell((int) (long) jsonObj.get("dwell"));
+								case "DOOR_INDICATOR":
+									handleDoorIndicator((int) (long) jsonObj.get("DOOR_INDICATOR"));
 									break;
 
-								case "mode":
-									handleMode((int) (long) jsonObj.get("mode"));
+								case "DOOR_STATUS":
+									handleDoorStatus((boolean) jsonObj.get("DOOR_STATUS"));
+									break;
+
+								case "SKIPSTOP_STATUS":
+									handleSkipStopStatus((int) (long) jsonObj.get("SKIPSTOP_STATUS"));
+									break;
+
+								case "DWELL":
+									handleDwell((int) (long) jsonObj.get("DWELL"));
+									break;
+
+								case "MODE":
+									handleMode((int) (long) jsonObj.get("MODE"));
 									break;
 							}
 						}
@@ -153,8 +210,8 @@ public class App {
 		}
 	}
 
-	private void handleATPBrake(boolean isBrake) {
-		App.atpBrake = isBrake;
+	private void handleATPBrake(int atpBrake) {
+		App.atpBrake = atpBrake;
 	}
 
 	private void handleNonATPBrake(boolean isBrake) {
@@ -171,6 +228,17 @@ public class App {
 
 	private void handleATOStatus(int status) {
 		App.atpStatus = status;
+
+		switch (status) {
+			case 3:
+				isReqBttnMCS = false;
+				break;
+
+			case 4:
+				isReqBttnAUTO = false;
+				break;
+
+		}
 	}
 
 	private void handleAtennaStatus(int status) {
@@ -189,20 +257,16 @@ public class App {
 		App.doorStatus = status;
 	}
 
-	private void handleDwell(int dwell) {
-		App.dwell = dwell;
+	private void handleDwell(int DWELL) {
+		App.DWELL = DWELL;
 	}
 
 	private void handleSkipStopStatus(int status) {
 		App.skipstopStatus = status;
 	}
 
-	private void handleMode(int mode) {
-		App.mode = mode;
-	}
-
-	public void run() {
-		initConnection();
+	private void handleMode(int MODE) {
+		App.MODE = MODE;
 	}
 
 	public static void main(String[] args) {
