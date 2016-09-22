@@ -88,6 +88,7 @@ public class App {
 							key = keys.next();
 
 							switch (key) {
+								
 								case "IS_TURNON":
 									isTurnOn = (boolean) jsonObj.get("IS_TURNON");
 
@@ -97,9 +98,7 @@ public class App {
 
 									break;
 
-								case "DISABLE_BUTTON":
-									System.out.println("disable button");
-
+								case "DISABLE_BUTTON":							
 									isReqBttnYARD = false;
 									isReqBttnMCS = false;
 									isReqBttnAUTO = false;
@@ -110,6 +109,7 @@ public class App {
 									int value = (int) (long) jsonObj.get("REQ_MODE");
 
 									switch (value) {
+										
 										case 1:
 											isReqBttnYARD = true;
 											break;
@@ -130,6 +130,7 @@ public class App {
 									break;
 
 								case "SPEED":
+									
 									try {
 										speed = (double) jsonObj.get(key);
 									} catch (Exception ex) {
