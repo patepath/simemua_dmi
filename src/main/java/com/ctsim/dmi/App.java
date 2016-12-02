@@ -61,10 +61,55 @@ public class App {
 	}
 
 	public void run() {
+		while(true) {
+			if(socket == null) {
+				initCommunication();
+
+			} else {
+				try {
+					if(socket.getInputStream().available() > 0) {
+						receiveMessage();
+					} else {
+						sendMessage();
+					}
+				} catch(IOException ex) {
+					socket = null;
+					System.out.println("connection fail");
+				}
+			}
+
+			try {
+				Thread.sleep(10);
+			} catch(Exception ex) {
+			}
+		}
 		initConnection();
 	}
 
-	private void initConnection() {
+	private void receiveMessage() {
+	}
+
+	private void sendMessage() {
+	}
+
+	private void initCommunication() {
+		System.out.println("try to connecting");
+
+		try {
+			socket = new Socket("192.168.1.10", 2510);
+
+			if(socket.isConnected()) {
+				out = new PrintWriter(socket.getOutputStream(), true);
+				out.println("SESSION=DMI");
+				out.flush();
+				in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+			} 
+		} catch(IOException ex) {
+			System.out.println("connection fail");
+		}
+	}
+
+	private void initConnection1() {
 
 		Iterator<String> keys;
 		String key;
