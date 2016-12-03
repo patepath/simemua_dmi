@@ -15,6 +15,7 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.Calendar;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -50,17 +51,20 @@ public class App {
 	public static int DWELL;
 	public static int skipstopStatus;
 	public static int MODE;
-
 	public static boolean isReqBttnATB = false;
 	public static boolean isReqBttnMCS = false;
 	public static boolean isReqBttnAUTO = false;
 	public static boolean isReqBttnYARD = false;
+
+	private Calendar ts;
 
 	public App() {
 
 	}
 
 	public void run() {
+		ts = Calendar.getInstance();
+
 		while(true) {
 			if(socket == null) {
 				initCommunication();
@@ -78,15 +82,125 @@ public class App {
 				}
 			}
 
+			initCommunication();
+
 			try {
 				Thread.sleep(10);
 			} catch(Exception ex) {
 			}
 		}
-		initConnection();
 	}
 
-	private void receiveMessage() {
+	private void receiveMessage() throws IOException {
+		try {
+			jsonObj = (JSONObject) parser.parse(in.readLine());
+			Iterator<String> keys = jsonObj.keySet().iterator();
+
+			while (keys.hasNext()) {
+				String key = keys.next();
+
+				switch (key) {
+					
+					case "IS_TURNON":
+						isTurnOn = (boolean) jsonObj.get("IS_TURNON");
+
+						if (!isTurnOn) {
+							atpStatus = 0;
+						}
+
+						break;
+
+					case "DISABLE_BUTTON":							
+						isReqBttnYARD = false;
+						isReqBttnMCS = false;
+						isReqBttnAUTO = false;
+						isReqBttnATB = false;
+						break;
+
+					case "REQ_MODE":
+						int value = (int) (long) jsonObj.get("REQ_MODE");
+
+						switch (value) {
+							
+							case 1:
+								isReqBttnYARD = true;
+								break;
+
+							case 3:
+								isReqBttnMCS = true;
+								break;
+
+							case 4:
+								isReqBttnAUTO = true;
+								break;
+
+							case 5:
+								isReqBttnATB = true;
+								break;
+						}
+
+						break;
+
+					case "SPEED":
+						try {
+							speed = (double) jsonObj.get(key);
+						} catch (Exception ex) {
+
+						}
+						break;
+
+					case "ATP_BRAKE":
+						handleATPBrake((int) (long) jsonObj.get("ATP_BRAKE"));
+						break;
+
+					case "NON_ATP_BRAKE":
+						handleNonATPBrake((boolean) jsonObj.get("NON_ATP_BRAKE"));
+						break;
+
+					case "TARGET_DISTANCE":
+						handleTargetDistance((double) jsonObj.get("TARGET_DISTANCE"));
+						break;
+
+					case "TARGET_DISTANCE_ACTUAL":
+						handleTargetDistanceActual((double) jsonObj.get("TARGET_DISTANCE_ACTUAL"));
+						break;
+
+					case "CEILING_SPEED":
+						handleCeilingSpeed((double) jsonObj.get("CEILING_SPEED"));
+						break;
+
+					case "ATP_STATUS":
+						handleATOStatus((int) (long) jsonObj.get("ATP_STATUS"));
+						break;
+
+					case "ATENNA_STATUS":
+						handleAtennaStatus((int) (long) jsonObj.get("ATENNA_STATUS"));
+						break;
+
+					case "DOOR_INDICATOR":
+						handleDoorIndicator((int) (long) jsonObj.get("DOOR_INDICATOR"));
+						break;
+
+					case "DOOR_STATUS":
+						handleDoorStatus((boolean) jsonObj.get("DOOR_STATUS"));
+						break;
+
+					case "SKIPSTOP_STATUS":
+						handleSkipStopStatus((int) (long) jsonObj.get("SKIPSTOP_STATUS"));
+						break;
+
+					case "DWELL":
+						handleDwell((int) (long) jsonObj.get("DWELL"));
+						break;
+
+					case "MODE":
+						handleMode((int) (long) jsonObj.get("MODE"));
+						break;
+				}
+			}
+		} catch (NullPointerException | ParseException ex) {
+			Logger.getLogger(App.class.getName()).log(Level.SEVERE, null, ex);
+		}
 	}
 
 	private void sendMessage() {
