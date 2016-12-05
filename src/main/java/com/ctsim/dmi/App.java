@@ -59,11 +59,10 @@ public class App {
 	private Calendar ts;
 
 	public App() {
-
+		ts = Calendar.getInstance();
 	}
 
 	public void run() {
-		ts = Calendar.getInstance();
 
 		while(true) {
 			if(socket == null) {
@@ -82,7 +81,9 @@ public class App {
 				}
 			}
 
-			initCommunication();
+			if(isTimeout()) {
+				socket = null;
+			}
 
 			try {
 				Thread.sleep(10);
@@ -101,6 +102,10 @@ public class App {
 
 				switch (key) {
 					
+					case "WATCHDOG":
+						ts =  Calendar.getInstance();
+						break;
+						
 					case "IS_TURNON":
 						isTurnOn = (boolean) jsonObj.get("IS_TURNON");
 
@@ -110,7 +115,7 @@ public class App {
 
 						break;
 
-					case "DISABLE_BUTTON":							
+					case "DISABLE_BUTTON":	
 						isReqBttnYARD = false;
 						isReqBttnMCS = false;
 						isReqBttnAUTO = false;
@@ -204,6 +209,11 @@ public class App {
 	}
 
 	private void sendMessage() {
+		while (!outQueue.isEmpty()) {
+			msg = outQueue.poll();
+			out.println(msg);
+			out.flush();
+		}
 	}
 
 	private void initCommunication() {
@@ -221,6 +231,10 @@ public class App {
 		} catch(IOException ex) {
 			System.out.println("connection fail");
 		}
+	}
+
+	private boolean isTimeout() {
+		return Calendar.getInstance().getTimeInMillis() - ts.getTimeInMillis() > 5000;
 	}
 
 	private void initConnection1() {
